@@ -1,0 +1,103 @@
+\begin{frame}{Semi-Explicit DAE Form}
+\begin{block}{Simplified Formulation}
+\begin{align}
+\frac{dx}{dt} &= f(x(t), y(x(t))) \\
+y(t) &= h(x(t))
+\end{align}
+\end{block}
+
+\begin{block}{Backward Euler (Implicit)}
+\begin{equation}
+x_{n+1} = x_n + \Delta t \cdot f(x_{n+1}, y_{n+1})
+\end{equation}
+\end{block}
+\end{frame}
+
+\begin{frame}{Backward Euler Discretization}
+\begin{block}{Time Derivative Approximation}
+\begin{equation}
+\frac{dx}{dt}\bigg|_{t=t_{n+1}} \approx \frac{x_{n+1} - x_n}{\Delta t}
+\end{equation}
+\end{block}
+
+\begin{block}{Implicit Scheme}
+\begin{equation}
+x_{n+1} = x_n + \Delta t \cdot f(x_{n+1}, y_{n+1})
+\end{equation}
+where $y_{n+1} = h(x_{n+1})$
+\end{block}
+\end{frame}
+
+\section{Newton-Raphson Solution}
+
+\begin{frame}{Nonlinear System Formulation}
+\begin{block}{Residual Function}
+Define:
+\begin{equation}
+G(x) = x - x_n - \Delta t \cdot f(x, h(x)) = 0
+\end{equation}
+\end{block}
+
+\begin{itemize}
+\item We need to find $x_{n+1}$ such that $G(x_{n+1}) = 0$
+\item This is a root-finding problem
+\item Newton-Raphson method provides quadratic convergence
+\end{itemize}
+
+\begin{block}{Newton-Raphson Iteration}
+\begin{equation}
+x^{(k+1)} = x^{(k)} - \left[\frac{\partial G}{\partial x}\bigg|_{x^{(k)}}\right]^{-1} G(x^{(k)})
+\end{equation}
+\end{block}
+\end{frame}
+
+\begin{frame}{Jacobian Computation}
+\begin{block}{Chain Rule Application}
+\begin{align}
+\frac{\partial G}{\partial x} &= I - \Delta t \frac{\partial}{\partial x}[f(x, h(x))] \\
+&= I - \Delta t \left[\frac{\partial f}{\partial x} + \frac{\partial f}{\partial y}\frac{\partial h}{\partial x}\right]
+\end{align}
+\end{block}
+
+\begin{itemize}
+\item $I$ - $n \times n$ identity matrix
+\item $\frac{\partial f}{\partial x} \in \R^{n \times n}$ - Jacobian of $f$ w.r.t. $x$
+\item $\frac{\partial f}{\partial y} \in \R^{n \times m}$ - Jacobian of $f$ w.r.t. $y$
+\item $\frac{\partial h}{\partial x} \in \R^{m \times n}$ - Jacobian of constraint function
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Newton Iteration Steps}
+\begin{block}{For each Newton iteration:}
+\begin{enumerate}
+\item Compute $y^{(k)} = h(x^{(k)})$
+\item Evaluate residual: $G(x^{(k)}) = x^{(k)} - x_n - \Delta t \cdot f(x^{(k)}, y^{(k)})$
+\item Check convergence: $\|G(x^{(k)})\| < \text{tolerance}$
+\item Compute Jacobian: $J = I - \Delta t (\nabla_x f + \nabla_y f \cdot \nabla_x h)$
+\item Solve linear system: $J \Delta x = -G(x^{(k)})$
+\item Update: $x^{(k+1)} = x^{(k)} + \Delta x$
+\end{enumerate}
+\end{block}
+
+\section{Algorithm Implementation}
+
+\begin{frame}[fragile]{Algorithm Overview}
+\begin{algorithm}[H]
+\caption{Backward Euler for DAEs}
+\begin{algorithmic}[1]
+\Procedure{BackwardEuler}{$x_0, N_{steps}, \Delta t$}
+\For{$n = 0$ to $N_{steps} - 1$}
+    \State $x_{old} \gets x$
+    \State $x_{new} \gets x$ \Comment{Initial guess}
+    \For{$k = 0$ to $MaxIter - 1$}
+        \State Compute residual $G$ and Jacobian $J$
+        \If{$\|G\| < tolerance$} \textbf{break} \EndIf
+        \State Solve $J \Delta x = -G$
+        \State $x_{new} \gets x_{new} + \Delta x$
+    \EndFor
+    \State $x \gets x_{new}$
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{frame}

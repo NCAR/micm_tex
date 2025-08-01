@@ -1,0 +1,100 @@
+\documentclass{beamer}
+
+\usepackage{mathtools}
+\usepackage{minted}
+\usepackage{xcolor}
+\usepackage[export]{adjustbox}
+\usepackage{chemformula}
+
+\usetheme{PaloAlto}
+\usecolortheme{whale}
+
+\setbeamertemplate{navigation symbols}{}
+
+\title[MUSICA DAE]{Carbonic Acid Test Case for the \\
+MUSICA
+\footnote{Multi-Scale Infrastructure for Chemistry and Aerosols}
+MICM
+\footnote{Model-Independent Chemistry Module}
+\\ Differential Algebraic Equations Prototype}
+% \subtitle{ACOM
+% \footnote{Atmospheric Chemistry, Observations, and Modeling}
+% Research Report}
+
+\author[Fillmore]{David Fillmore \\
+\vspace{-0.35in}}
+
+% \author[Fillmore]{David Fillmore\inst{NCAR,ACOM,M}}
+% \institute[ACOM]{
+% \inst{NCAR}%
+% National Center for Atmospheric Research
+% \and
+% \inst{ACOM}%
+% Atmospheric Chemistry, Observations, and Modeling Lab
+% \and
+% \inst{M}%
+% Modeling Section
+% }
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section{Aqueous Carbonic System}
+
+\begin{frame}
+\include{carbonic_equilibrium_reactions}
+\end{frame}
+
+\begin{frame}
+\include{carbonic_charge_balance}
+\end{frame}
+
+\begin{frame}
+\include{carbonic_equilibrium_constants}
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\includegraphics[scale=0.4]{/Users/fillmore/Plots/carbonate_speciation.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\includegraphics[scale=0.4]{/Users/fillmore/Plots/pH_vs_CO2_concentration.png}
+\end{figure}
+\end{frame}
+
+\section{Differential Algebraic Equations}
+\frametitle{DAE System}
+
+\begin{frame}
+\include{dae_variable_definitions}
+\end{frame}
+
+\begin{frame}
+\include{dae_system}
+\end{frame}
+
+\begin{frame}
+\include{dae_discretized_system}
+\end{frame}
+
+\begin{frame}
+\include{dae_jacobian_fx}
+\include{dae_jacobian_fy}
+\end{frame}
+
+\begin{frame}
+\include{dae_jacobian_yx}
+\include{dae_total_jacobian}
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\includegraphics[scale=0.35]{/Users/fillmore/Plots/dae_system.png}
+\end{figure}
+\end{frame}
+
+\end{document}

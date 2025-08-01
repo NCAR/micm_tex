@@ -1,0 +1,16 @@
+\vspace{-0.2in}
+
+\begin{block}{DAE System}
+\begin{align*}
+\frac{dx_0}{dt} &= \frac{1}{\tau_0}[1 - x_0] \\
+\frac{dx_1}{dt} &= \frac{1}{\tau_1}[x_0 - x_1 \, y(x_1, x_2)] \\
+\frac{dx_2}{dt} &= \frac{1}{\tau_2}[x_1 - x_2 \, y(x_1, x_2)] \\
+y(x_1, x_2) &= \frac{A}{y(x_1, x_2)} + B_1 x_1 + B_2 x_2
+\end{align*}
+\end{block}
+
+\begin{block}{Analytic Solution for $x_0$}
+\begin{equation*}
+x_0(t) = 1 + [x_0(0) - 1]e^{-t/\tau_0}
+\end{equation*}
+\end{block}

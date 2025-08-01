@@ -1,0 +1,414 @@
+\documentclass[10pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,positioning}
+
+\title{Backward Euler Method for Differential Algebraic Equations}
+\author{David Fillmore}
+\date{June 7, 2025}
+\institute{Physics Simulation Project}
+
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}{Differential Algebraic Equations (DAEs)}
+\begin{block}{General DAE System}
+\begin{align}
+\frac{dx}{dt} &= f(x(t), y(t)) \tag{ODE part}\\
+0 &= g(x(t), y(t)) \tag{Algebraic constraint}
+\end{align}
+\end{block}
+
+\begin{itemize}
+\item $x(t) \in \R^n$ - differential variables
+\item $y(t) \in \R^m$ - algebraic variables
+\item Common in physics, engineering, and control theory
+\end{itemize}
+
+\begin{exampleblock}{Applications}
+\begin{itemize}
+\item Chemical reaction networks
+\item Mechanical systems with constraints
+\item Electrical circuits
+\end{itemize}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Semi-Explicit DAE Form}
+\begin{block}{Simplified Formulation}
+For our implementation:
+\begin{align}
+\frac{dx}{dt} &= f(x(t), y(x(t))) \\
+y(t) &= h(x(t))
+\end{align}
+\end{block}
+
+\begin{itemize}
+\item Algebraic variables explicitly defined as functions of differential variables
+\item Eliminates need to solve constraint equation at each step
+\item Simplifies implementation while maintaining DAE character
+\end{itemize}
+
+\pause
+\begin{alertblock}{Key Advantage}
+No need for index reduction or constraint stabilization!
+\end{alertblock}
+\end{frame}
+
+\section{Backward Euler Method}
+
+\begin{frame}{Why Backward Euler?}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{block}{Forward Euler (Explicit)}
+\begin{equation}
+x_{n+1} = x_n + \Delta t \cdot f(x_n, y_n)
+\end{equation}
+\end{block}
+\begin{itemize}
+\item Simple to implement
+\item Conditionally stable
+\item Small step sizes required
+\end{itemize}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\begin{block}{Backward Euler (Implicit)}
+\begin{equation}
+x_{n+1} = x_n + \Delta t \cdot f(x_{n+1}, y_{n+1})
+\end{equation}
+\end{block}
+\begin{itemize}
+\item A-stable (unconditionally stable)
+\item Larger step sizes possible
+\item Requires solving nonlinear system
+\end{itemize}
+\end{column}
+\end{columns}
+
+\pause
+\begin{alertblock}{Trade-off}
+Stability vs. computational cost per step
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Backward Euler Discretization}
+\begin{block}{Time Derivative Approximation}
+\begin{equation}
+\frac{dx}{dt}\bigg|_{t=t_{n+1}} \approx \frac{x_{n+1} - x_n}{\Delta t}
+\end{equation}
+\end{block}
+
+\begin{block}{Implicit Scheme}
+\begin{equation}
+x_{n+1} = x_n + \Delta t \cdot f(x_{n+1}, y_{n+1})
+\end{equation}
+where $y_{n+1} = h(x_{n+1})$
+\end{block}
+
+\pause
+\begin{alertblock}{Challenge}
+This is a \textbf{nonlinear system} in $x_{n+1}$ that must be solved at each time step!
+\end{alertblock}
+\end{frame}
+
+\section{Newton-Raphson Solution}
+
+\begin{frame}{Nonlinear System Formulation}
+\begin{block}{Residual Function}
+Define:
+\begin{equation}
+G(x) = x - x_n - \Delta t \cdot f(x, h(x)) = 0
+\end{equation}
+\end{block}
+
+\begin{itemize}
+\item We need to find $x_{n+1}$ such that $G(x_{n+1}) = 0$
+\item This is a root-finding problem
+\item Newton-Raphson method provides quadratic convergence
+\end{itemize}
+
+\pause
+\begin{block}{Newton-Raphson Iteration}
+\begin{equation}
+x^{(k+1)} = x^{(k)} - \left[\frac{\partial G}{\partial x}\bigg|_{x^{(k)}}\right]^{-1} G(x^{(k)})
+\end{equation}
+\end{block}
+\end{frame}
+
+\begin{frame}{Jacobian Computation}
+\begin{block}{Chain Rule Application}
+\begin{align}
+\frac{\partial G}{\partial x} &= I - \Delta t \frac{\partial}{\partial x}[f(x, h(x))] \\
+&= I - \Delta t \left[\frac{\partial f}{\partial x} + \frac{\partial f}{\partial y}\frac{\partial h}{\partial x}\right]
+\end{align}
+\end{block}
+
+\begin{itemize}
+\item $I$ - $n \times n$ identity matrix
+\item $\frac{\partial f}{\partial x} \in \R^{n \times n}$ - Jacobian of $f$ w.r.t. $x$
+\item $\frac{\partial f}{\partial y} \in \R^{n \times m}$ - Jacobian of $f$ w.r.t. $y$
+\item $\frac{\partial h}{\partial x} \in \R^{m \times n}$ - Jacobian of constraint function
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Newton Iteration Steps}
+\begin{block}{For each Newton iteration:}
+\begin{enumerate}
+\item Compute $y^{(k)} = h(x^{(k)})$
+\item Evaluate residual: $G(x^{(k)}) = x^{(k)} - x_n - \Delta t \cdot f(x^{(k)}, y^{(k)})$
+\item Check convergence: $\|G(x^{(k)})\| < \text{tolerance}$
+\item Compute Jacobian: $J = I - \Delta t (\nabla_x f + \nabla_y f \cdot \nabla_x h)$
+\item Solve linear system: $J \Delta x = -G(x^{(k)})$
+\item Update: $x^{(k+1)} = x^{(k)} + \Delta x$
+\end{enumerate}
+\end{block}
+
+\pause
+\begin{alertblock}{Critical Step}
+Linear system solution is the computational bottleneck!
+\end{alertblock}
+\end{frame}
+
+\section{Algorithm Implementation}
+
+\begin{frame}[fragile]{Algorithm Overview}
+\begin{algorithm}[H]
+\caption{Backward Euler for DAEs}
+\begin{algorithmic}[1]
+\Procedure{BackwardEuler}{$x_0, N_{steps}, \Delta t$}
+\For{$n = 0$ to $N_{steps} - 1$}
+    \State $x_{old} \gets x$
+    \State $x_{new} \gets x$ \Comment{Initial guess}
+    \For{$k = 0$ to $MaxIter - 1$}
+        \State Compute residual $G$ and Jacobian $J$
+        \If{$\|G\| < tolerance$} \textbf{break} \EndIf
+        \State Solve $J \Delta x = -G$
+        \State $x_{new} \gets x_{new} + \Delta x$
+    \EndFor
+    \State $x \gets x_{new}$
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\end{frame}
+
+\begin{frame}{Implementation Considerations}
+\begin{block}{Linear System Solution}
+\begin{itemize}
+\item Gaussian elimination with partial pivoting
+\item LU decomposition for repeated solves
+\item Iterative methods for large sparse systems
+\item Condition number monitoring
+\end{itemize}
+\end{block}
+
+\begin{block}{Convergence Control}
+\begin{itemize}
+\item Tolerance: typically $10^{-10}$ to $10^{-12}$
+\item Maximum iterations: 20-50
+\item Divergence detection
+\item Step size adaptation
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{Stability and Properties}
+
+\begin{frame}{A-Stability}
+\begin{block}{Definition}
+A method is A-stable if it remains stable for any step size $\Delta t > 0$ when applied to:
+\begin{equation}
+\frac{dx}{dt} = \lambda x, \quad \text{Re}(\lambda) < 0
+\end{equation}
+\end{block}
+
+\begin{theorem}
+The backward Euler method is A-stable.
+\end{theorem}
+
+\pause
+\begin{block}{Practical Implications}
+\begin{itemize}
+\item No stability restrictions on step size
+\item Can take large steps for stiff problems
+\item Ideal for problems with multiple time scales
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Accuracy and Convergence}
+\begin{theorem}[First-Order Accuracy]
+For sufficiently smooth solutions, the backward Euler method has global truncation error $O(\Delta t)$.
+\end{theorem}
+
+\begin{block}{Newton Convergence Requirements}
+\begin{itemize}
+\item Initial guess sufficiently close to solution
+\item Non-singular Jacobian
+\item Sufficient smoothness of $f$
+\end{itemize}
+\end{block}
+
+\pause
+\begin{alertblock}{Trade-off}
+First-order accuracy vs. excellent stability properties
+\end{alertblock}
+\end{frame}
+
+\section{Example Application}
+
+\begin{frame}{Lotka-Volterra System}
+\begin{block}{Modified System with Constraint}
+\begin{align}
+\frac{dx_0}{dt} &= r_0 x_0 - x_0^2 + c_0 y_0 \\
+\frac{dx_1}{dt} &= r_1 x_1 - x_1^2 + c_1 y_0 \\
+y_0 &= -x_0 x_1
+\end{align}
+\end{block}
+
+\begin{itemize}
+\item Predator-prey dynamics with nonlinear constraint
+\item Tests both ODE integration and constraint handling
+\item Representative of many physical systems
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Required Jacobians}
+\begin{block}{Jacobian Matrices}
+\begin{align}
+\frac{\partial f}{\partial x} &= \begin{pmatrix}
+r_0 - 2x_0 & 0 \\
+0 & r_1 - 2x_1
+\end{pmatrix} \\[0.5em]
+\frac{\partial f}{\partial y} &= \begin{pmatrix}
+c_0 \\
+c_1
+\end{pmatrix} \\[0.5em]
+\frac{\partial h}{\partial x} &= \begin{pmatrix}
+-x_1 & -x_0
+\end{pmatrix}
+\end{align}
+\end{block}
+
+\begin{itemize}
+\item Analytical derivatives ensure accuracy
+\item Sparse structure can be exploited
+\item Straightforward to implement
+\end{itemize}
+\end{frame}
+
+\section{Practical Considerations}
+
+\begin{frame}{Step Size Control}
+\begin{block}{Adaptive Strategies}
+\begin{itemize}
+\item Monitor Newton iteration count
+\item Accept step if converged within iteration limit
+\item Reject and halve step size if diverged
+\item Increase step size if converged quickly
+\end{itemize}
+\end{block}
+
+\begin{block}{Error Estimation}
+Local truncation error estimate:
+\begin{equation}
+\tau_{n+1} = \frac{x_{n+1}^{(2\Delta t)} - x_{n+1}^{(\Delta t)}}{\Delta t}
+\end{equation}
+\end{block}
+\end{frame}
+
+\begin{frame}{Performance Optimization}
+\begin{block}{Computational Bottlenecks}
+\begin{enumerate}
+\item Linear system solution (dominant cost)
+\item Jacobian evaluation
+\item Function evaluations
+\end{enumerate}
+\end{block}
+
+\begin{block}{Optimization Strategies}
+\begin{itemize}
+\item Reuse LU factorization when possible
+\item Approximate Jacobians for some iterations
+\item Exploit sparsity patterns
+\item Parallel linear algebra routines
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Summary}
+\begin{block}{Backward Euler Method Advantages}
+\begin{itemize}
+\item A-stable (unconditionally stable)
+\item Robust for stiff problems
+\item Well-suited for DAE systems
+\item Straightforward implementation
+\end{itemize}
+\end{block}
+
+\begin{block}{Implementation Keys}
+\begin{itemize}
+\item Robust linear solver with pivoting
+\item Proper convergence criteria
+\item Error handling and validation
+\item Adaptive step size control
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Future Enhancements}
+\begin{block}{Potential Improvements}
+\begin{itemize}
+\item Higher-order BDF methods
+\item Automatic differentiation for Jacobians
+\item Sparse matrix techniques
+\item Variable step size and order control
+\item Parallel implementation
+\end{itemize}
+\end{block}
+
+\begin{block}{Applications}
+\begin{itemize}
+\item Chemical kinetics modeling
+\item Multibody dynamics
+\item Power system analysis
+\item Climate modeling
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\centering
+\Large Thank you for your attention!
+
+\vspace{1cm}
+
+Questions?
+
+\vspace{1cm}
+
+\normalsize
+\texttt{davidfillmore@github.com} \\
+\texttt{github.com/davidfillmore/Physics}
+\end{frame}
+
+\end{document}

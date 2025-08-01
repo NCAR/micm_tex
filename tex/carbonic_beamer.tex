@@ -1,0 +1,165 @@
+\documentclass{beamer}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{chemformula}
+\usepackage{siunitx}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\title{Carbonic Acid System Model}
+\subtitle{Gas-Liquid Equilibrium and Aqueous Speciation}
+\author{Your Name}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{System Components}
+\begin{itemize}
+\item Gas phase: \ch{CO2(g)}
+\item Aqueous species:
+\begin{itemize}
+\item \ch{H+}, \ch{OH-} (water)
+\item \ch{CO2(aq)} (dissolved CO$_2$)
+\item \ch{HCO3-} (bicarbonate)
+\item \ch{CO3^2-} (carbonate)
+\end{itemize}
+\item All species in equilibrium
+\item Electroneutrality maintained
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Equilibrium Reactions}
+\begin{align}
+\ch{H2O &<=> H+ + OH-} \quad &K_w &= [\ch{H+}][\ch{OH-}] = 10^{-14} \\[0.3cm]
+\ch{CO2(g) &<=> CO2(aq)} \quad &K_H &= \frac{[\ch{CO2(aq)}]}{P_{\ch{CO2}}} = 3.4 \times 10^{-2} \\[0.3cm]
+\ch{CO2(aq) + H2O &<=> H+ + HCO3-} \quad &K_1 &= \frac{[\ch{H+}][\ch{HCO3-}]}{[\ch{CO2(aq)}]} = 4.3 \times 10^{-7} \\[0.3cm]
+\ch{HCO3- &<=> H+ + CO3^2-} \quad &K_2 &= \frac{[\ch{H+}][\ch{CO3^2-}]}{[\ch{HCO3-}]} = 4.7 \times 10^{-11}
+\end{align}
+\end{frame}
+
+\begin{frame}
+\frametitle{System of Equations}
+Five unknowns: $[\ch{H+}]$, $[\ch{OH-}]$, $[\ch{CO2(aq)}]$, $[\ch{HCO3-}]$, $[\ch{CO3^2-}]$
+
+\begin{align}
+K_w &= [\ch{H+}][\ch{OH-}] \\[0.2cm]
+K_H P_{\ch{CO2}} &= [\ch{CO2(aq)}] \\[0.2cm]
+K_1 &= \frac{[\ch{H+}][\ch{HCO3-}]}{[\ch{CO2(aq)}]} \\[0.2cm]
+K_2 &= \frac{[\ch{H+}][\ch{CO3^2-}]}{[\ch{HCO3-}]} \\[0.2cm]
+0 &= [\ch{H+}] - [\ch{OH-}] - [\ch{HCO3-}] - 2[\ch{CO3^2-}]
+\end{align}
+
+Last equation: electroneutrality constraint
+\end{frame}
+
+\begin{frame}
+\frametitle{Rearranged System}
+From equilibrium expressions:
+\begin{align}
+[\ch{OH-}] &= \frac{K_w}{[\ch{H+}]} \\[0.2cm]
+[\ch{CO2(aq)}] &= K_H P_{\ch{CO2}} \\[0.2cm]
+[\ch{HCO3-}] &= \frac{K_1 [\ch{CO2(aq)}]}{[\ch{H+}]} = \frac{K_1 K_H P_{\ch{CO2}}}{[\ch{H+}]} \\[0.2cm]
+[\ch{CO3^2-}] &= \frac{K_2 [\ch{HCO3-}]}{[\ch{H+}]} = \frac{K_1 K_2 K_H P_{\ch{CO2}}}{[\ch{H+}]^2}
+\end{align}
+\end{frame}
+
+\begin{frame}
+\frametitle{Charge Balance Substitution}
+Substituting into electroneutrality:
+\begin{align}
+0 &= [\ch{H+}] - [\ch{OH-}] - [\ch{HCO3-}] - 2[\ch{CO3^2-}] \\[0.3cm]
+0 &= [\ch{H+}] - \frac{K_w}{[\ch{H+}]} - \frac{K_1 K_H P_{\ch{CO2}}}{[\ch{H+}]} - \frac{2 K_1 K_2 K_H P_{\ch{CO2}}}{[\ch{H+}]^2}
+\end{align}
+
+Multiplying by $[\ch{H+}]^2$:
+\begin{align}
+0 &= [\ch{H+}]^3 - K_w [\ch{H+}] - K_1 K_H P_{\ch{CO2}} [\ch{H+}] - 2 K_1 K_2 K_H P_{\ch{CO2}}
+\end{align}
+
+This is a cubic equation in $[\ch{H+}]$
+\end{frame}
+
+\begin{frame}
+\frametitle{Alpha Fractions}
+Species distribution as function of pH:
+\begin{align}
+\alpha_0 &= \frac{[\ch{CO2(aq)}]}{C_T} = \frac{[\ch{H+}]^2}{[\ch{H+}]^2 + K_1[\ch{H+}] + K_1 K_2} \\[0.3cm]
+\alpha_1 &= \frac{[\ch{HCO3-}]}{C_T} = \frac{K_1[\ch{H+}]}{[\ch{H+}]^2 + K_1[\ch{H+}] + K_1 K_2} \\[0.3cm]
+\alpha_2 &= \frac{[\ch{CO3^2-}]}{C_T} = \frac{K_1 K_2}{[\ch{H+}]^2 + K_1[\ch{H+}] + K_1 K_2}
+\end{align}
+
+where $C_T = [\ch{CO2(aq)}] + [\ch{HCO3-}] + [\ch{CO3^2-}]$ is total carbonate
+\end{frame}
+
+\begin{frame}
+\frametitle{Key pH Values}
+Important transition points:
+\begin{itemize}
+\item $\text{pH} = \text{p}K_1 = -\log_{10}(K_1) = 6.37$
+\begin{itemize}
+\item $[\ch{CO2(aq)}] = [\ch{HCO3-}]$
+\item $\alpha_0 = \alpha_1 = 0.5$
+\end{itemize}
+\item $\text{pH} = \text{p}K_2 = -\log_{10}(K_2) = 10.33$
+\begin{itemize}
+\item $[\ch{HCO3-}] = [\ch{CO3^2-}]$
+\item $\alpha_1 = \alpha_2 = 0.5$
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Numerical Solution Method}
+For given $P_{\ch{CO2}} = 4 \times 10^{-4}$ atm (400 ppm):
+
+\begin{enumerate}
+\item Set up system of 5 nonlinear equations
+\item Use initial guess for all concentrations
+\item Apply Newton-Raphson or similar solver
+\item Iterate until convergence
+\end{enumerate}
+
+Python implementation uses \texttt{scipy.optimize.fsolve}
+\end{frame}
+
+\begin{frame}
+\frametitle{Typical Results (400 ppm CO$_2$)}
+\begin{table}
+\centering
+\begin{tabular}{|l|c|}
+\hline
+Species & Concentration (M) \\
+\hline
+pH & 5.65 \\
+$[\ch{H+}]$ & $2.2 \times 10^{-6}$ \\
+$[\ch{OH-}]$ & $4.5 \times 10^{-9}$ \\
+$[\ch{CO2(aq)}]$ & $1.4 \times 10^{-5}$ \\
+$[\ch{HCO3-}]$ & $2.7 \times 10^{-6}$ \\
+$[\ch{CO3^2-}]$ & $5.8 \times 10^{-12}$ \\
+$C_T$ & $1.7 \times 10^{-5}$ \\
+\hline
+\end{tabular}
+\end{table}
+
+Dominated by dissolved CO$_2$ at this pH
+\end{frame}
+
+\begin{frame}
+\frametitle{Applications}
+This model applies to:
+\begin{itemize}
+\item Ocean chemistry and acidification
+\item Atmospheric CO$_2$ dissolution
+\item Groundwater carbonate systems
+\item Industrial CO$_2$ scrubbing
+\item Buffer calculations
+\item Geochemical modeling
+\end{itemize}
+\end{frame}
+
+\end{document}
